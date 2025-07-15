@@ -51,3 +51,14 @@ app.post('/api/shorturl', (req, res) => {
     }
   });
 });
+
+app.get('/api/shorturl/:short_url', (req, res) => {
+  const short_url = Number(req.params.short_url);
+  const record = urls.find(entry => entry.short_url === short_url);
+
+  if (record) {
+    res.redirect(record.original_url);
+  } else {
+    res.json({ error: 'No short URL found for given input' });
+  }
+});
