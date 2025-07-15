@@ -15,10 +15,39 @@ app.get('/', function(req, res) {
 });
 
 // Your first API endpoint
-app.get('/api/hello', function(req, res) {
+
+app.get('/api/shorturl', function(req, res) {
+  console.log("shorturl");
   res.json({ greeting: 'hello API' });
 });
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
+});
+const bodyParser = require('body-parser');
+const dns = require('dns');
+const urlParser = require('url');
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
+let urls = [];
+let id = 1;
+app.post('/api/shorturl', (req, res) => {
+  const original_url = req.body.url;
+
+  // Validar URL usando dns.lookup para verificar dominio
+  const parsedUrl = urlParser.parse(original_url);
+
+  if (!/^https?:\/\//.test(original_url)) {
+    return res.json({ error: 'invalid url' });
+  }
+
+  dns.lookup(parsedUrl.hostname, (err, address) => {
+    if (err) {
+      return res.json({ error: 'invalid url' });
+    } else {
+      const short_url = id++;
+      urls.push({ original_url, short_url });
+      res.json({ original_url, short_url });
+    }
+  });
 });
